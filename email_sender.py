@@ -23,116 +23,191 @@ def check_escalations(projects: list[dict]) -> tuple[bool, int]:
     return escalation_count > 0, escalation_count
 
 
-def parse_report_sections(report_text: str) -> dict:
-    """
-    Parse report text into structured sections.
+def build_summary_html(summary: dict) -> str:
+    """Build executive summary section from JSON."""
+    headline = summary.get('headline', 'Portfolio analysis in progress')
+    red = summary.get('red', 0)
+    amber = summary.get('amber', 0)
+    green = summary.get('green', 0)
+    total_budget = summary.get('total_budget_eur', 0)
+    spend_confirmed = summary.get('spend_confirmed', False)
 
-    Args:
-        report_text: Plain text report from Claude
+    status_badge = f"<span style='color: #dc2626; font-weight: 600;'>{red} Red</span> · <span style='color: #f59e0b; font-weight: 600;'>{amber} Amber</span> · <span style='color: #16a34a; font-weight: 600;'>{green} Green</span>"
 
-    Returns:
-        Dict with section keys and HTML content
-    """
-    sections = {}
-    current_section = "executive_summary"
-    current_content = []
-
-    section_mapping = {
-        "Executive Summary": "executive_summary",
-        "Immediate Actions Required": "actions",
-        "Projects at Risk": "at_risk",
-        "On-Track Projects": "on_track",
-        "Budget Overview": "budget",
-        "Recommended Leadership Actions": "recommendations"
-    }
-
-    for line in report_text.split("\n"):
-        # Check if line is a section header
-        is_header = False
-        for header_text, section_key in section_mapping.items():
-            if line.strip().startswith(header_text):
-                if current_content:
-                    sections[current_section] = "\n".join(current_content).strip()
-                    current_content = []
-                current_section = section_key
-                is_header = True
-                break
-
-        if not is_header:
-            current_content.append(line)
-
-    if current_content:
-        sections[current_section] = "\n".join(current_content).strip()
-
-    return sections
-
-
-def format_section(section_key: str, content: str) -> str:
-    """Format a report section as HTML."""
-
-    section_styles = {
-        "executive_summary": {
-            "title": "📊 Executive Summary",
-            "bg": "#eff6ff",
-            "border": "#3b82f6",
-            "icon": "📊"
-        },
-        "actions": {
-            "title": "⚠️ Immediate Actions Required",
-            "bg": "#fef2f2",
-            "border": "#dc2626",
-            "icon": "⚠️"
-        },
-        "at_risk": {
-            "title": "🟠 Projects at Risk",
-            "bg": "#fffbeb",
-            "border": "#f59e0b",
-            "icon": "🟠"
-        },
-        "on_track": {
-            "title": "✅ On-Track Projects",
-            "bg": "#f0fdf4",
-            "border": "#16a34a",
-            "icon": "✅"
-        },
-        "budget": {
-            "title": "💰 Budget Overview",
-            "bg": "#f5f3ff",
-            "border": "#a855f7",
-            "icon": "💰"
-        },
-        "recommendations": {
-            "title": "🎯 Recommended Leadership Actions",
-            "bg": "#f0f9ff",
-            "border": "#0284c7",
-            "icon": "🎯"
-        }
-    }
-
-    style = section_styles.get(section_key, section_styles["executive_summary"])
-
-    # Escape HTML in content
-    escaped = content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    escaped = escaped.replace("\n\n", "</p><p>").replace("\n", "<br>")
+    budget_note = "" if spend_confirmed else "<em>(Spend figures pending final confirmation)</em>"
 
     return f"""
-    <div style="background-color: {style['bg']}; border-left: 4px solid {style['border']}; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+    <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
         <h2 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-            {style['icon']} {style['title']}
+            📊 Executive Summary
         </h2>
         <div style="color: #374151; font-size: 14px; line-height: 1.6;">
-            <p>{escaped}</p>
+            <p><strong>{headline}</strong></p>
+            <p>Portfolio status: {status_badge}</p>
+            <p>Total budget: €{total_budget:,.0f} {budget_note}</p>
         </div>
     </div>
     """
 
 
-def build_html_email(report_text: str, projects: list[dict], report_date: str) -> str:
+def build_actions_html(actions: list) -> str:
+    """Build immediate actions section from JSON."""
+    if not actions:
+        return ""
+
+    items = ""
+    for action in actions:
+        project_id = action.get('project_id', '')
+        project_name = action.get('project_name', '')
+        issue = action.get('issue', '')
+        act = action.get('action', '')
+        owner = action.get('owner', '')
+        deadline = action.get('deadline', '')
+
+        items += f"""
+        <div style="background-color: white; border: 1px solid #fee2e2; border-radius: 4px; padding: 12px; margin-bottom: 10px;">
+            <p style="margin: 0 0 6px 0; font-weight: 600; color: #991b1b;">{project_id}: {project_name}</p>
+            <p style="margin: 0 0 6px 0; color: #374151;"><strong>Issue:</strong> {issue}</p>
+            <p style="margin: 0 0 6px 0; color: #374151;"><strong>Action:</strong> {act}</p>
+            <p style="margin: 0; color: #6b7280; font-size: 13px;"><strong>Owner:</strong> {owner} | <strong>Deadline:</strong> {deadline}</p>
+        </div>
+        """
+
+    return f"""
+    <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #991b1b; font-size: 16px; font-weight: 600;">
+            ⚠️ Immediate Actions Required
+        </h2>
+        {items}
+    </div>
     """
-    Build HTML email template with report content.
+
+
+def build_amber_html(amber: list) -> str:
+    """Build projects at risk section from JSON."""
+    if not amber:
+        return ""
+
+    items = ""
+    for project in amber:
+        project_id = project.get('project_id', '')
+        project_name = project.get('project_name', '')
+        watch_point = project.get('watch_point', '')
+
+        items += f"""
+        <div style="padding: 8px 0; border-bottom: 1px solid #fef3c7; color: #374151; font-size: 13px;">
+            <strong>{project_id}: {project_name}</strong><br>
+            <em style="color: #6b7280;">Watch:</em> {watch_point}
+        </div>
+        """
+
+    return f"""
+    <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; font-weight: 600;">
+            🟠 Projects at Risk
+        </h2>
+        <div style="color: #374151; font-size: 14px;">
+            {items}
+        </div>
+    </div>
+    """
+
+
+def build_green_html(green: list) -> str:
+    """Build on-track projects section from JSON."""
+    if not green:
+        return ""
+
+    items = ""
+    for project in green:
+        project_id = project.get('project_id', '')
+        project_name = project.get('project_name', '')
+        milestone = project.get('milestone', '')
+        due = project.get('due', '')
+
+        items += f"""
+        <div style="padding: 8px 0; border-bottom: 1px solid #dcfce7; color: #374151; font-size: 13px;">
+            <strong>{project_id}: {project_name}</strong><br>
+            Next milestone: {milestone} ({due})
+        </div>
+        """
+
+    return f"""
+    <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #166534; font-size: 16px; font-weight: 600;">
+            ✅ On-Track Projects
+        </h2>
+        <div style="color: #374151; font-size: 14px;">
+            {items}
+        </div>
+    </div>
+    """
+
+
+def build_budget_html(budget_flags: list, total_budget: int) -> str:
+    """Build budget overview section from JSON."""
+    critical_count = sum(1 for b in budget_flags if b.get('severity') == 'critical')
+    warning_count = sum(1 for b in budget_flags if b.get('severity') == 'warning')
+
+    flags_html = ""
+    for flag in budget_flags:
+        project_id = flag.get('project_id', '')
+        remaining = flag.get('remaining_eur', 0)
+        severity = flag.get('severity', 'info')
+
+        color = '#dc2626' if severity == 'critical' else '#f59e0b' if severity == 'warning' else '#6b7280'
+        badge = '🔴' if severity == 'critical' else '🟠' if severity == 'warning' else '⚪'
+
+        flags_html += f"""
+        <div style="padding: 8px; color: {color}; font-size: 13px;">
+            {badge} {project_id}: €{remaining:,.0f} remaining
+        </div>
+        """
+
+    summary = f"<p style='margin: 0 0 8px 0;'><strong>{critical_count}</strong> critical | <strong>{warning_count}</strong> warning</p>"
+
+    return f"""
+    <div style="background-color: #f5f3ff; border-left: 4px solid #a855f7; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #6b21a8; font-size: 16px; font-weight: 600;">
+            💰 Budget Overview
+        </h2>
+        {summary}
+        {flags_html}
+    </div>
+    """
+
+
+def build_recommendations_html(actions: list) -> str:
+    """Build leadership actions section from JSON."""
+    if not actions:
+        return ""
+
+    items = ""
+    for i, action in enumerate(actions, 1):
+        items += f"""
+        <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #dbeafe; color: #374151; font-size: 14px;">
+            <strong>{i}.</strong> {action}
+        </div>
+        """
+
+    return f"""
+    <div style="background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #0c4a6e; font-size: 16px; font-weight: 600;">
+            🎯 Recommended Leadership Actions
+        </h2>
+        <div style="color: #374151;">
+            {items}
+        </div>
+    </div>
+    """
+
+
+def build_html_email(report_json: dict, projects: list[dict], report_date: str) -> str:
+    """
+    Build HTML email template from structured JSON report.
 
     Args:
-        report_text: Plain text report from Claude
+        report_json: Structured JSON report from Claude
         projects: List of project dicts (for escalation check)
         report_date: Date string (Monday of report week)
 
@@ -149,11 +224,18 @@ def build_html_email(report_text: str, projects: list[dict], report_date: str) -
         </div>
         """
 
-    sections = parse_report_sections(report_text)
-    sections_html = ""
-    for section_key in ["executive_summary", "actions", "at_risk", "on_track", "budget", "recommendations"]:
-        if section_key in sections:
-            sections_html += format_section(section_key, sections[section_key])
+    # Build sections from JSON
+    summary_html = build_summary_html(report_json.get('summary', {}))
+    actions_html = build_actions_html(report_json.get('immediate_actions', []))
+    amber_html = build_amber_html(report_json.get('amber_projects', []))
+    green_html = build_green_html(report_json.get('green_milestones', []))
+    budget_html = build_budget_html(
+        report_json.get('budget_flags', []),
+        report_json.get('summary', {}).get('total_budget_eur', 0)
+    )
+    recommendations_html = build_recommendations_html(report_json.get('leadership_actions', []))
+
+    sections_html = summary_html + actions_html + amber_html + green_html + budget_html + recommendations_html
 
     html = f"""
     <!DOCTYPE html>
@@ -202,15 +284,6 @@ def build_html_email(report_text: str, projects: list[dict], report_date: str) -
                 font-size: 12px;
                 color: #6b7280;
                 text-align: center;
-            }}
-            h2 {{
-                font-size: 16px;
-                font-weight: 600;
-                margin-bottom: 12px;
-            }}
-            p {{
-                margin-bottom: 12px;
-                font-size: 14px;
             }}
             @media (max-width: 600px) {{
                 .header h1 {{ font-size: 22px; }}
