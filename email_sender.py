@@ -23,6 +23,110 @@ def check_escalations(projects: list[dict]) -> tuple[bool, int]:
     return escalation_count > 0, escalation_count
 
 
+def parse_report_sections(report_text: str) -> dict:
+    """
+    Parse report text into structured sections.
+
+    Args:
+        report_text: Plain text report from Claude
+
+    Returns:
+        Dict with section keys and HTML content
+    """
+    sections = {}
+    current_section = "executive_summary"
+    current_content = []
+
+    section_mapping = {
+        "Executive Summary": "executive_summary",
+        "Immediate Actions Required": "actions",
+        "Projects at Risk": "at_risk",
+        "On-Track Projects": "on_track",
+        "Budget Overview": "budget",
+        "Recommended Leadership Actions": "recommendations"
+    }
+
+    for line in report_text.split("\n"):
+        # Check if line is a section header
+        is_header = False
+        for header_text, section_key in section_mapping.items():
+            if line.strip().startswith(header_text):
+                if current_content:
+                    sections[current_section] = "\n".join(current_content).strip()
+                    current_content = []
+                current_section = section_key
+                is_header = True
+                break
+
+        if not is_header:
+            current_content.append(line)
+
+    if current_content:
+        sections[current_section] = "\n".join(current_content).strip()
+
+    return sections
+
+
+def format_section(section_key: str, content: str) -> str:
+    """Format a report section as HTML."""
+
+    section_styles = {
+        "executive_summary": {
+            "title": "📊 Executive Summary",
+            "bg": "#eff6ff",
+            "border": "#3b82f6",
+            "icon": "📊"
+        },
+        "actions": {
+            "title": "⚠️ Immediate Actions Required",
+            "bg": "#fef2f2",
+            "border": "#dc2626",
+            "icon": "⚠️"
+        },
+        "at_risk": {
+            "title": "🟠 Projects at Risk",
+            "bg": "#fffbeb",
+            "border": "#f59e0b",
+            "icon": "🟠"
+        },
+        "on_track": {
+            "title": "✅ On-Track Projects",
+            "bg": "#f0fdf4",
+            "border": "#16a34a",
+            "icon": "✅"
+        },
+        "budget": {
+            "title": "💰 Budget Overview",
+            "bg": "#f5f3ff",
+            "border": "#a855f7",
+            "icon": "💰"
+        },
+        "recommendations": {
+            "title": "🎯 Recommended Leadership Actions",
+            "bg": "#f0f9ff",
+            "border": "#0284c7",
+            "icon": "🎯"
+        }
+    }
+
+    style = section_styles.get(section_key, section_styles["executive_summary"])
+
+    # Escape HTML in content
+    escaped = content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    escaped = escaped.replace("\n\n", "</p><p>").replace("\n", "<br>")
+
+    return f"""
+    <div style="background-color: {style['bg']}; border-left: 4px solid {style['border']}; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+        <h2 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
+            {style['icon']} {style['title']}
+        </h2>
+        <div style="color: #374151; font-size: 14px; line-height: 1.6;">
+            <p>{escaped}</p>
+        </div>
+    </div>
+    """
+
+
 def build_html_email(report_text: str, projects: list[dict], report_date: str) -> str:
     """
     Build HTML email template with report content.
@@ -40,77 +144,97 @@ def build_html_email(report_text: str, projects: list[dict], report_date: str) -
     escalation_banner = ""
     if has_escalations:
         escalation_banner = f"""
-        <div style="background-color: #dc2626; color: white; padding: 16px; margin-bottom: 24px; border-radius: 4px; font-weight: bold;">
-            ⚠ ACTION REQUIRED: {esc_count} project(s) require immediate escalation
+        <div style="background-color: #7c2d12; color: white; padding: 16px; margin-bottom: 24px; border-radius: 6px; font-weight: 600; font-size: 15px;">
+            🚨 URGENT: {esc_count} project(s) require immediate escalation — see details below
         </div>
         """
 
-    # Escape report text for HTML and preserve line breaks
-    escaped_report = report_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    escaped_report = escaped_report.replace("\n", "<br>")
+    sections = parse_report_sections(report_text)
+    sections_html = ""
+    for section_key in ["executive_summary", "actions", "at_risk", "on_track", "budget", "recommendations"]:
+        if section_key in sections:
+            sections_html += format_section(section_key, sections[section_key])
 
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            * {{ margin: 0; padding: 0; }}
             body {{
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 line-height: 1.6;
-                color: #333;
-                max-width: 800px;
+                color: #1f2937;
+                background-color: #f9fafb;
+                padding: 0;
+            }}
+            .wrapper {{
+                max-width: 700px;
                 margin: 0 auto;
-                padding: 20px;
+                background-color: white;
             }}
             .header {{
-                border-bottom: 3px solid #1f2937;
-                padding-bottom: 16px;
-                margin-bottom: 24px;
+                background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+                color: white;
+                padding: 32px 24px;
+                text-align: center;
+                border-bottom: 4px solid #3b82f6;
             }}
             .header h1 {{
-                margin: 0;
-                font-size: 24px;
-                color: #1f2937;
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
             }}
-            .subheader {{
-                font-size: 14px;
-                color: #6b7280;
-                margin-top: 8px;
+            .header p {{
+                font-size: 13px;
+                opacity: 0.9;
             }}
             .content {{
-                background-color: #f9fafb;
-                padding: 20px;
-                border-radius: 6px;
-                font-family: "Monaco", "Courier New", monospace;
-                font-size: 13px;
-                white-space: pre-wrap;
-                word-wrap: break-word;
+                padding: 32px 24px;
             }}
             .footer {{
-                margin-top: 24px;
-                padding-top: 16px;
+                background-color: #f3f4f6;
+                padding: 20px 24px;
                 border-top: 1px solid #e5e7eb;
                 font-size: 12px;
-                color: #9ca3af;
+                color: #6b7280;
                 text-align: center;
+            }}
+            h2 {{
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }}
+            p {{
+                margin-bottom: 12px;
+                font-size: 14px;
+            }}
+            @media (max-width: 600px) {{
+                .header h1 {{ font-size: 22px; }}
+                .content {{ padding: 20px 16px; }}
+                .header {{ padding: 24px 16px; }}
             }}
         </style>
     </head>
     <body>
-        <div class="header">
-            <h1>IME Division — Weekly Portfolio Report</h1>
-            <div class="subheader">Week of {report_date} • AI-generated draft — human review required</div>
-        </div>
+        <div class="wrapper">
+            <div class="header">
+                <h1>IME Division</h1>
+                <p>Weekly Portfolio Report • Week of {report_date}</p>
+            </div>
 
-        {escalation_banner}
+            <div class="content">
+                {escalation_banner}
+                {sections_html}
+            </div>
 
-        <div class="content">
-{escaped_report}
-        </div>
-
-        <div class="footer">
-            Auto-generated report. Review before distributing.
+            <div class="footer">
+                <p><strong>AI-generated draft</strong> — review before distributing to leadership</p>
+                <p style="margin-top: 8px;">Generated for dena IME Division | {report_date}</p>
+            </div>
         </div>
     </body>
     </html>
