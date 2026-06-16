@@ -1,31 +1,33 @@
 # Use Case Definition: AI-Powered Portfolio Reporting System
 ## dena IME Weekly Status Reports
 
-**Document Version:** 1.0  
-**Date:** June 2026  
-**Project:** dena IME Weekly Report Automation  
-**Status:** Implementation Complete
+**Document Version:** 1.1
+**Date:** June 2026
+**Project:** dena IME Weekly Report Automation
+**Status:** Deployed — Pilot Phase
 
 ---
 
 ## 1. Company Profile
 
 ### Organization
+
 **dena** (Deutsche Energie-Agentur / German Energy Agency) is a federal institution supporting Germany's energy transition. As a publicly mandated agency under the Federal Ministry for Economic Affairs and Climate Action, dena plays a critical role in accelerating decarbonization and sustainable energy systems across Germany.
 
-**Organization Size:** ~350 employees across multiple divisions  
-**Headquarters:** Berlin, Germany  
+**Organization Size:** ~350 employees across multiple divisions
+**Headquarters:** Berlin, Germany
 **Mandate:** Policy implementation, market development, and portfolio management for energy transition initiatives
 
-### IME Division (International and Emerging Markets)
-The **IME Division** (International & Emerging Markets) manages dena's international energy transition portfolio and emerging market expansion projects.
+### IME Division (Industrie, Mobilität, Energieeffizienz)
 
-- **Team Size:** [ASSUMPTION] ~30-40 full-time staff (project managers, analysts, finance coordinators)
-- **Budget Responsibility:** [ASSUMPTION] €50-100M portfolio across 26 active energy transition projects
+The **IME Division** (Industry, Mobility & Energy Efficiency) manages dena's domestic energy transition portfolio across industrial decarbonization, mobility transition, and energy efficiency programmes.
+
+- **Team Size:** ~100 full-time staff (project managers, analysts, finance coordinators, domain experts)
+- **Budget Responsibility:** [ASSUMPTION] €50–100M portfolio across 26 active energy transition projects
 - **Key Functions:**
   - Strategic project portfolio management
-  - Stakeholder coordination (government, international partners, private sector)
-  - Progress tracking and risk assessment
+  - Stakeholder coordination (Federal Ministry, industry partners, municipalities)
+  - Progress tracking and risk assessment across project portfolio
   - Budget and resource allocation oversight
   - Executive reporting to Federal Ministry leadership
 
@@ -34,15 +36,17 @@ The **IME Division** (International & Emerging Markets) manages dena's internati
 ## 2. Business Problem
 
 ### Current State: Manual Portfolio Reporting
+
 The IME Division currently generates weekly portfolio status reports through a **manual, labor-intensive process**:
 
 #### Process Inefficiencies
+
 1. **Time Consumption**
-   - Data compilation from Excel spreadsheets: [ASSUMPTION] 3-4 hours/week
-   - Manual analysis and interpretation: [ASSUMPTION] 2-3 hours/week
-   - Report writing and formatting: [ASSUMPTION] 1-2 hours/week
+   - Data compilation from Excel spreadsheets: [ASSUMPTION] 3–4 hours/week
+   - Manual analysis and interpretation: [ASSUMPTION] 2–3 hours/week
+   - Report writing and formatting: [ASSUMPTION] 1–2 hours/week
    - Email distribution and follow-up: [ASSUMPTION] 30 minutes/week
-   - **Total weekly effort:** [ASSUMPTION] ~7-10 hours per analyst
+   - **Total weekly effort: [ASSUMPTION] ~7–10 hours per analyst**
 
 2. **Information Gaps**
    - No automated early warning system for at-risk projects
@@ -51,170 +55,202 @@ The IME Division currently generates weekly portfolio status reports through a *
    - Leadership recommendations generated from intuition rather than data-driven analysis
 
 3. **Quality & Consistency Issues**
-   - Report structure and depth vary week-to-week
+   - Report structure and depth vary week-to-week depending on analyst
    - No standardized risk assessment framework
    - Important metrics occasionally overlooked
-   - Tone and focus inconsistent across reports
+   - Tone and focus inconsistent across reporting cycles
 
 4. **Stakeholder Friction**
    - Leadership receives inconsistent insight into portfolio health
-   - Project managers wait for manual feedback instead of real-time dashboards
-   - Finance can't validate budget burn rates efficiently
+   - Project managers wait for manual feedback instead of structured updates
+   - Finance cannot validate budget burn rates efficiently
    - No audit trail of how recommendations were derived
 
 ### Business Impact
-- **Inefficient resource allocation:** Analyst time spent on data wrangling vs. strategic thinking
+
+- **Inefficient resource allocation:** Analyst time spent on data wrangling rather than strategic thinking
 - **Delayed decision-making:** Information asymmetry prevents proactive intervention
-- **Risk blind spots:** Early warning signals for project failure missed
+- **Risk blind spots:** Early warning signals for project failure are missed or delayed
 - **Scaling constraints:** Manual process breaks down as portfolio grows beyond 26 projects
 
 ---
 
-## 3. AI-Powered Solution Proposed
+## 3. AI-Powered Solution
 
 ### Solution Overview
+
 An **automated, Claude AI-powered portfolio reporting system** that reads Excel project data, generates intelligent analysis, and delivers structured HTML email reports every Monday at 08:00 UTC.
+
+The system follows the **Agentic AI pattern**: it plans (APScheduler defines the weekly trigger), acts (reads Excel data and calls the Claude API for analysis), observes (logs outcomes, handles errors, validates outputs), and iterates (runs autonomously each week, with prompt refinement between cycles). This distinguishes it from a simple script — the system is a goal-directed loop with error recovery and human oversight built in.
 
 ### System Architecture
 
 #### Components
-1. **Data Ingestion** (openpyxl)
+
+1. **Data Ingestion** (`openpyxl`)
    - Reads local Excel file: `dena_IME_mock_dataset_v2.xlsx`
    - Extracts project data from sheet: `CONSOLIDATED DASHBOARD`
    - Columns captured: Project ID, Name, Funder, Budget, Spend YTD, Budget %, HR Utilization, Milestone Status, Overall Status, Escalation Flag, Next Milestone, Key Risk
    - Stops at first empty Project ID (column A)
 
-2. **Intelligent Analysis** (Claude API)
+2. **Intelligent Analysis** (Claude API — Sonnet)
    - Sends structured project dataset to Claude AI
    - Generates contextual analysis using:
      - Budget burn rate calculations
      - Risk correlation analysis
      - Milestone vs. budget alignment checks
      - Escalation impact assessment
-   - Produces recommendations grounded in data patterns
+   - Returns structured JSON output for reliable downstream processing
+   - `max_tokens` set to 2,500 to prevent silent response truncation
 
 3. **Report Generation**
-   - Structured sections (Executive Summary, Actions Required, Risk Analysis, Budget Overview, Leadership Recommendations)
+   - Structured sections: Executive Summary, Actions Required, Risk Analysis, Budget Overview, Leadership Recommendations
    - Tone: Professional, concise, decision-oriented
-   - Length: Max 700 words
-   - Format: Plain text with clear headers
+   - Includes mandatory "Limitations" note: AI analysis is decision support, not a decision maker
+   - Format: Structured JSON → rendered HTML
 
 4. **Delivery** (Resend)
    - HTML email template with professional branding
-   - Escalation warning banner (if red-flagged projects exist)
-   - Responsive design for mobile/desktop
-   - Monospace font for data readability
-   - Audit disclaimer footer
+   - Escalation warning banner if red-flagged projects exist
+   - Responsive design for mobile and desktop
+   - Audit disclaimer footer on every report
 
-5. **Orchestration** (APScheduler)
+5. **Human-in-the-Loop (mandatory design decision)**
+   - PM reviews every report before distribution — approximately 1 hour/week
+   - This is not optional overhead: it is the primary control for catching LLM errors and satisfying EU AI Act human oversight requirements
+   - See Risk 2.1 and Compliance Documentation for detail
+
+6. **Orchestration** (APScheduler)
    - Cron-based scheduling: Every Monday at 08:00 UTC
-   - Configurable for other frequencies if needed
    - Graceful error handling with fallback notifications
+   - All events logged to `dena_report.log` for audit
 
 #### Data Flow
+
 ```
-Excel File → Reader → Claude API → Report Generator → Email Sender → Leadership
+Excel File → Reader (openpyxl) → Claude API (JSON) → Report Generator → Human Review → Email Sender (Resend) → Leadership
 ```
 
 #### Deployment
+
 - **Development:** Local testing with `--now` flag
 - **Production:** Railway.app continuous process (keeps scheduler running 24/7)
-- **Environment Management:** `.env` file for API keys and config
+- **Environment Management:** `.env` file for API keys and config (no hardcoded credentials)
 
 ### Error Handling
-| Failure Scenario | Behavior |
+
+| Failure Scenario | Behaviour |
 |---|---|
 | Excel file not found | Log error, send fallback email with path info |
 | Empty portfolio (0 rows) | Abort, no report sent, log warning |
 | Claude API fails | Log error, send fallback email with error details |
+| JSON parsing fails (truncated response) | Log raw API response, retry with increased `max_tokens` |
 | Resend email fails | Log error, report still generated locally |
 
 ---
 
 ## 4. Key Stakeholders and Their Interests
 
-### 4.1 IME Division Head
+### 4.1 IME Division Head (Bereichsleitung IME)
+
 **Role:** Portfolio governance, strategic oversight, Federal Ministry liaison
 
 **Interests:**
-- ✅ Early visibility into at-risk projects before they escalate
-- ✅ Data-driven evidence for funding decisions
-- ✅ Consistent, structured briefing for Federal Ministry reports
-- ✅ Ability to identify patterns across 26 projects at a glance
-- ✅ Time savings to focus on strategic priorities
+- Early visibility into at-risk projects before they escalate
+- Data-driven evidence for funding and resource decisions
+- Consistent, structured briefing material for Federal Ministry reports
+- Ability to identify patterns across 26 projects at a glance
+- Time savings to focus on strategic priorities rather than data compilation
 
-**Pain Points (Addressed by Solution):**
-- Currently receives inconsistent weekly summaries
-- Lacks early warning system for project failures
-- Spends time chasing analysts for additional analysis
+**Pain Points Addressed:**
+- Currently receives inconsistent weekly summaries with varying depth
+- Lacks systematic early warning for project failures
+- Spends time chasing analysts for additional clarification
 
 ---
 
-### 4.2 Project Managers (26 projects)
+### 4.2 Themengebietsleitung Bereichsentwicklung und -controlling
+
+**Role:** Division development, controlling, portfolio operations oversight
+
+**Interests:**
+- Standardized KPI framework across all 26 projects
+- Automated budget health tracking replacing manual controlling cycles
+- Audit trail for internal governance and Federal Ministry accountability
+- Scalable reporting infrastructure as portfolio grows
+
+**Pain Points Addressed:**
+- Manual controlling process consumes significant analyst time
+- No systematic link between project status and budget burn in current reports
+- Difficulty maintaining consistent reporting standards across project managers
+
+---
+
+### 4.3 Project Managers (26 projects)
+
 **Role:** Day-to-day project execution, milestone tracking, budget management
 
 **Interests:**
-- ✅ Objective, fair risk assessment of their projects
-- ✅ Rapid feedback on status and escalation triggers
-- ✅ Data-driven recommendations, not subjective criticism
-- ✅ Recognition of on-track projects and wins
-- ✅ Understanding of budget burn rate trends
+- Objective, data-driven risk assessment of their projects
+- Rapid, structured feedback on status and escalation triggers
+- Recognition of on-track projects, not only flagging of problems
+- Understanding of their project's position relative to portfolio trends
 
-**Pain Points (Addressed by Solution):**
-- Manual reporting creates perception of bias
+**Pain Points Addressed:**
+- Manual reporting creates perception of subjective bias
 - Lack of real-time performance data
-- Difficulty contextualizing their project against portfolio trends
+- Difficulty contextualising individual project against full portfolio
 
 ---
 
-### 4.3 Finance Team
+### 4.4 Finance Team
+
 **Role:** Budget allocation, spend tracking, financial forecasting
 
 **Interests:**
-- ✅ Automated budget health tracking across portfolio
-- ✅ Early alerts for >90% budget consumption
-- ✅ Structured data for financial planning and forecasting
-- ✅ Audit trail linking recommendations to actual spend data
-- ✅ Validation that analysis includes financial metrics
+- Automated budget health tracking across portfolio
+- Early alerts for projects exceeding 90% budget consumption
+- Structured data for financial planning and forecasting
+- Audit trail linking recommendations to actual spend data
 
-**Pain Points (Addressed by Solution):**
+**Pain Points Addressed:**
 - Budget data not integrated into portfolio narrative
-- Manual correlation between spend and project status difficult
-- No systematic flag for over-budget projects
+- Manual correlation between spend and project status
+- No systematic flag for over-budget projects before crisis point
 
 ---
 
-### 4.4 IT / Operations Team
+### 4.5 IT / Operations Team
+
 **Role:** System deployment, uptime management, security compliance
 
 **Interests:**
-- ✅ Reliable, low-maintenance system (scheduler handles itself)
-- ✅ Clear API key management and `.env` security
-- ✅ Audit logging for compliance (all events logged to disk)
-- ✅ Scalable infrastructure (Railway handles auto-restart)
-- ✅ No sensitive data in logs or email subjects
+- Reliable, low-maintenance system (scheduler handles itself)
+- Secure API key management via `.env`
+- Audit logging for compliance (all events logged to disk)
+- Scalable infrastructure with auto-restart capability
 
-**Pain Points (Addressed by Solution):**
-- Minimal operational overhead (cron-based, not manual intervention)
+**Pain Points Addressed:**
+- Minimal operational overhead (cron-based, no manual intervention)
 - Secure credential handling (not hardcoded)
 - Built-in logging for compliance audits
 
 ---
 
-### 4.5 Legal / Compliance
+### 4.6 Legal / Compliance
+
 **Role:** Data protection, regulatory compliance, risk management
 
 **Interests:**
-- ✅ No sensitive data exposure in email subjects or logs
-- ✅ Audit trail of who generated recommendations
-- ✅ Compliance with German data protection (GDPR) requirements
-- ✅ Clear process documentation for regulators
-- ✅ Error logging for accountability
+- No sensitive data exposure in email subjects or logs
+- Audit trail of how recommendations were generated
+- GDPR compliance for any personal data processed
+- Clear process documentation for regulators
 
-**Pain Points (Addressed by Solution):**
+**Pain Points Addressed:**
 - Transparent, logged process (all events recorded)
 - No raw API keys in logs
-- Clear data flow and retention policy
+- Clear data flow and retention policy documented in GDPR section
 
 ---
 
@@ -223,106 +259,113 @@ Excel File → Reader → Claude API → Report Generator → Email Sender → L
 ### 5.1 Operational Success Criteria
 
 | Criterion | Target | How Measured |
-|-----------|--------|--------------|
-| **Report Delivery Uptime** | 99.5% (1 missed report/year max) | Monitoring Railway logs; incident count |
-| **Report Generation Time** | <2 minutes end-to-end | Logged timestamps in dena_report.log |
-| **Email Delivery Success** | 100% of generated reports sent | Resend API response logs |
-| **Data Accuracy** | 100% row match between Excel and analysis | Row count validation in logs |
-| **Schedule Reliability** | Report sent every Monday at 08:00 UTC | Consistent timestamp in logs |
+|---|---|---|
+| Report Delivery Uptime | 99.5% (max 1 missed report/year) | Railway logs; incident count |
+| Report Generation Time | <2 minutes end-to-end | Logged timestamps in `dena_report.log` |
+| Email Delivery Success | 100% of generated reports sent | Resend API response logs |
+| Data Accuracy | 100% row match between Excel and analysis | Row count validation in logs |
+| Schedule Reliability | Report sent every Monday at 08:00 UTC | Consistent timestamp in logs |
+
+---
 
 ### 5.2 Business Impact KPIs
 
 | Metric | Baseline | Target | Timeline | Measurement |
-|--------|----------|--------|----------|-------------|
-| **Analyst Time Savings** | 7-10 hours/week | <1 hour/week (email review only) | Week 1 | Weekly time tracking (before/after) |
-| **Time to Risk Detection** | 3-5 days (manual review) | Same day (automated Monday report) | Week 2 | Track project escalations: automated vs. missed |
-| **Early Warning Effectiveness** | TBD (baseline) | 80% of "red" projects flagged before crisis | Month 1-3 | Count projects with early escalation vs. surprises |
-| **Leadership Decision Turnaround** | 2-3 days (awaiting analyst clarification) | <24 hours (report-driven decisions) | Week 2 | Track decision logs post-report delivery |
-| **Report Consistency Score** | 60% (analyst-to-analyst variation) | 95%+ (standardized AI analysis) | Week 1 | Stakeholder feedback: consistency rating (1-10) |
-| **Data-Driven Recommendations** | [ASSUMPTION] 40% of actions rooted in data | 90%+ recommendations traceable to metrics | Month 1 | Audit trail: link recommendations → data points |
+|---|---|---|---|---|
+| Analyst Time Savings | 7–10 hrs/week | <1 hr/week (review only) | Week 1 | Weekly time tracking (before/after) |
+| Time to Risk Detection | 3–5 days (manual review) | Same day (Monday report) | Week 2 | Track automated vs. missed escalations |
+| Early Warning Effectiveness | TBD (establish baseline) | 80% of red projects flagged before crisis | Month 1–3 | Count early escalations vs. surprises |
+| Leadership Decision Turnaround | 2–3 days (awaiting clarification) | <24 hours | Week 2 | Decision log timestamps post-report |
+| Report Consistency Score | [ASSUMPTION] 60% (analyst variation) | 95%+ (standardised AI analysis) | Week 1 | Stakeholder feedback: consistency rating (1–10) |
+
+> **Note on financial impact:** Full ROI calculation, cost-benefit analysis, and financial assumptions are documented in `02_roi_risk_assessment.md`. The conservative annual benefit estimate is **€32,890/year** (direct savings), with a break-even of **7 weeks** under base-case assumptions.
+
+---
 
 ### 5.3 Stakeholder Satisfaction KPIs
 
-**Measurement Method:** Quarterly survey (0-10 scale, "Strongly Disagree" to "Strongly Agree")
+**Measurement method:** Quarterly survey (0–10 scale)
 
-| Stakeholder | Success Statement | Target Score | Baseline |
-|-------------|------------------|--------------|----------|
-| **IME Division Head** | "I have better visibility into at-risk projects" | 8/10 | TBD |
-| **IME Division Head** | "The report structure helps me brief the Federal Ministry" | 8/10 | TBD |
-| **Project Managers** | "The risk assessment is fair and data-driven" | 8/10 | TBD |
-| **Finance** | "Budget metrics are clearly integrated into recommendations" | 8/10 | TBD |
-| **All Users** | "Overall, this system saves me time and improves decision-making" | 8/10 | TBD |
+| Stakeholder | Success Statement | Target Score |
+|---|---|---|
+| IME Division Head | "I have better visibility into at-risk projects" | 8/10 |
+| IME Division Head | "The report structure helps me brief the Federal Ministry" | 8/10 |
+| Project Managers | "The risk assessment is fair and data-driven" | 8/10 |
+| Finance | "Budget metrics are clearly integrated into recommendations" | 8/10 |
+| All Users | "This system saves me time and improves decision-making" | 8/10 |
+
+---
 
 ### 5.4 Quality & Reliability KPIs
 
 | Criterion | Target | Measurement |
-|-----------|--------|-------------|
-| **Fallback Email Delivery** | <1% of reports generate fallbacks | Fallback count / total reports |
-| **Claude API Success Rate** | 99%+ (rate limit/error handling) | Successful analyses / total attempted |
-| **Log Completeness** | 100% of events logged (start, success, failure, email sent) | Manual log audit |
-| **Error Recovery** | System self-recovers from transient failures | Monitor: API retry behavior, Railway restarts |
-| **Data Integrity** | No row loss or duplication between Excel read and analysis | Row count validation before/after |
-
-### 5.5 Financial Impact (Optional)
-
-| Benefit | Estimated Value | Calculation |
-|---------|-----------------|-------------|
-| **Analyst Time Savings** | [ASSUMPTION] €15,000/year | 6-9 hrs/week × 50 weeks × €30/hr |
-| **Faster Decision-Making** | [ASSUMPTION] €50,000-100,000/year | Reduce project crisis costs via early warnings (assumes 1-2 prevented escalations) |
-| **Scalability Headroom** | [ASSUMPTION] €200,000+/year | Enable portfolio growth from 26 to 50+ projects without proportional staffing increase |
+|---|---|---|
+| Fallback Email Rate | <1% of reports trigger fallback | Fallback count / total reports |
+| Claude API Success Rate | 99%+ | Successful analyses / total attempted |
+| Log Completeness | 100% of events logged | Manual log audit |
+| Error Recovery | System self-recovers from transient failures | Monitor: retry behaviour, Railway restarts |
+| Data Integrity | No row loss or duplication | Row count validation before/after analysis |
+| Human Review Completion | 100% of reports reviewed before distribution | PM sign-off log |
 
 ---
 
 ## 6. Assumptions & Dependencies
 
-### Explicit Assumptions (Marked Throughout)
-- [ASSUMPTION] Team size, budget authority, and time consumption rates (not verified with dena)
-- [ASSUMPTION] Stakeholder interests extrapolated from typical portfolio governance models
-- [ASSUMPTION] KPI targets based on industry benchmarks for similar automation initiatives
-- [ASSUMPTION] Financial benefits estimated conservatively
+### Explicit Assumptions
 
-### Technical Assumptions
-- Excel file remains the authoritative source of project data
-- Claude API is available and reliable for weekly analysis
-- Resend email service remains operational and compliant
+- [ASSUMPTION] Budget authority, and time consumption rates not verified against dena internal data — estimates based on comparable portfolio management organisations
+- [ASSUMPTION] Stakeholder interests extrapolated from typical public-sector portfolio governance models
+- [ASSUMPTION] KPI targets based on industry benchmarks for similar reporting automation initiatives
+- [ASSUMPTION] Financial benefits estimated conservatively; see `02_roi_risk_assessment.md` for full model
+
+### Technical Dependencies
+
+- Excel file remains the authoritative source of project data (no cross-sheet formula references in the consolidated tab)
+- Claude API available and reliable for weekly analysis (Anthropic SLA)
+- Resend email service operational and EU-compliant
 - Railway.app continues to support 24/7 Python process hosting
-- System has stable internet connectivity for API calls
+- Stable internet connectivity for API calls from Railway
 
-### Organizational Assumptions
-- Federal Ministry will continue requiring weekly portfolio reports
-- Report format (email, HTML) is acceptable to stakeholders
-- No major organizational restructuring affects IME Division reporting requirements
-- Legal/compliance environment (GDPR, audit requirements) remains stable
+### Organisational Dependencies
+
+- Federal Ministry continues requiring weekly portfolio reports
+- Report format (email, HTML) acceptable to stakeholders
+- No major organisational restructuring affects IME Division reporting requirements
+- Legal/compliance environment (GDPR, IT-Sicherheitsgesetz, audit requirements) remains stable
 
 ---
 
-## 7. Next Steps & Success Handoff
+## 7. Implementation Status & Next Steps
 
 ### Implementation Phase (Complete)
-- ✅ System built, tested, and deployed to Railway
-- ✅ First reports generated and delivered
-- ✅ Logging and error handling validated
 
-### Monitoring Phase (Week 1-2)
+- System built, tested, and deployed to Railway
+- Structured JSON output from Claude API validated
+- Email delivery via Resend confirmed
+- Logging and error handling validated
+- `max_tokens` bug resolved (increased to 2,500; raw API response logging added)
+
+### Pilot Phase (Weeks 1–4)
+
 - Track schedule reliability (Monday 08:00 consistency)
 - Monitor email delivery success rate
-- Collect initial stakeholder feedback
-- Validate data accuracy (row counts, metrics)
+- Validate time-savings assumption via PM time tracking
+- Collect initial stakeholder feedback on report quality and format
 
-### Optimization Phase (Month 1-3)
+### Optimisation Phase (Month 1–3)
+
 - Gather KPI baseline measurements
 - Refine Claude prompt based on stakeholder feedback
-- Adjust report sections if needed
-- Fine-tune schedule or escalation thresholds
+- Adjust report sections or escalation thresholds as needed
+- Conduct bias audit: review recommendations for unexplained variance by project type
 
-### Success Measurement (Month 3)
-- Conduct full KPI assessment
+### Success Review (Month 3)
+
+- Full KPI assessment against targets in Section 5
 - Stakeholder satisfaction survey
-- Cost-benefit validation
-- Recommendation for portfolio expansion or process changes
+- Cost-benefit validation against ROI model
+- Decision: extend pilot, expand portfolio scope, or adjust system design
 
 ---
 
-**Document Prepared:** June 2026  
-**System Status:** Operational  
-**Next Review Date:** September 2026 (post Month-3 KPI assessment)
+*Version 1.1 · Prepared June 2026 · System Status: Deployed — Pilot Phase · Next Review: September 2026*
