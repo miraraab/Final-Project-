@@ -205,7 +205,7 @@ def build_recommendations_html(actions: list) -> str:
     """
 
 
-def build_html_email(report_json: dict, projects: list[dict], report_date: str, charts: dict = None, validation: dict = None) -> str:
+def build_html_email(report_json: dict, projects: list[dict], report_date: str, charts: dict = None, validation: dict = None, news_html: str = "") -> str:
     """
     Build HTML email template from structured JSON report.
 
@@ -260,7 +260,7 @@ def build_html_email(report_json: dict, projects: list[dict], report_date: str, 
     </div>
     """
 
-    sections_html = summary_html + validation_html + charts_html + actions_html + amber_html + green_html + budget_html + recommendations_html
+    sections_html = summary_html + validation_html + charts_html + actions_html + amber_html + green_html + budget_html + recommendations_html + news_html
 
     html = f"""
     <!DOCTYPE html>
@@ -347,7 +347,8 @@ def send_email(
     recipient_email: str,
     api_key: str,
     charts: dict = None,
-    validation: dict = None
+    validation: dict = None,
+    news_html: str = ""
 ) -> bool:
     """
     Send formatted HTML email via Resend.
@@ -379,7 +380,7 @@ def send_email(
         logger.debug(f"Validation type: {type(validation)}, keys: {list(validation.keys()) if isinstance(validation, dict) else 'N/A'}")
 
         try:
-            html_body = build_html_email(report_text, projects, report_date, charts=charts, validation=validation)
+            html_body = build_html_email(report_text, projects, report_date, charts=charts, validation=validation, news_html=news_html)
         except Exception as e:
             logger.error(f"Error building HTML email: {e}", exc_info=True)
             raise

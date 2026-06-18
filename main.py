@@ -17,6 +17,7 @@ from report import generate_report
 from email_sender import send_email, send_fallback_email
 from chart_agent import generate_portfolio_charts
 from data_validator import validate_portfolio_data
+from news_fetcher import fetch_energy_news, build_news_html
 
 # Configure logging
 logging.basicConfig(
@@ -43,6 +44,7 @@ def run_report():
 
     anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
     resend_api_key = os.getenv("RESEND_API_KEY")
+    news_api_key = os.getenv("NEWS_API_KEY")
     recipient_email = os.getenv("REPORT_RECIPIENT_EMAIL")
     sender_email = os.getenv("REPORT_SENDER_EMAIL")
     data_file_path = os.getenv("DATA_FILE_PATH", "data/dena_IME_mock_dataset_v2.xlsx")
@@ -86,9 +88,18 @@ def run_report():
     logger.info("Generating portfolio charts")
     charts = generate_portfolio_charts(projects)
 
+    # Step 2c: Fetch energy sector news
+    logger.info("Fetching energy sector news")
+    news_articles = fetch_energy_news(news_api_key) if news_api_key else []
+    news_html = build_news_html(news_articles)
+    logger.info(f"Fetched {len(news_articles)} news articles")
+
     # Step 3: Send email
     logger.info("Sending report email")
-    email_sent = send_email(report, projects, sender_email, recipient_email, resend_api_key, charts=charts, validation=validation)
+    email_sent = send_email(
+        report, projects, sender_email, recipient_email, resend_api_key,
+        charts=charts, validation=validation, news_html=news_html
+    )
 
     if not email_sent:
         logger.warning("Email send failed, but report was generated successfully")
