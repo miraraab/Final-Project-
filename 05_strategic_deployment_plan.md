@@ -46,7 +46,7 @@
 - ⚠️ Data quality controls implemented in Excel workflow
 - ⚠️ Training materials drafted
 
-**Phase 1 Investment:** [ASSUMPTION] €4,290 (development, setup, testing)
+**Phase 1 Investment:** [ASSUMPTION] €2,970 (development, setup, testing at €45/hr)
 
 ---
 
@@ -221,12 +221,12 @@ Apr  May   Jun   Jul   Aug   Sep   Oct   Nov   Dec
                                                         → Year 2 Strategy
 ```
 
-**Total Phase 1–3 Investment:** €4,290 + €8,000 + €12,000 = **€24,290**
+**Total Phase 1–3 Investment:** €2,970 + €8,000 + €12,000 = **€22,970**
 
 **Note on payback periods:** Two valid payback metrics exist and should not be confused:
 
-- **Operational break-even (ROI doc):** €4,290 upfront investment recouped in **7 weeks** from direct time savings (€32,890/year). This measures the return on the build investment alone.
-- **Full programme break-even (this document):** €24,290 total programme cost (including Pilot and Deployment phases) recouped in approximately **9–10 months** from direct time savings. This is the more conservative and comprehensive measure.
+- **Operational break-even (ROI doc):** €2,970 upfront investment recouped in **~5.6 months** from direct time savings (€6,390/year, realistic scenario: 1.5 hrs/week at €45/hr). This measures the return on the build investment alone.
+- **Full programme break-even (this document):** €22,970 total programme cost (including Pilot and Deployment phases) recouped in approximately **3.6 years** from direct time savings. This is the more conservative and comprehensive measure; business case depends on early-warning benefits or portfolio scaling.
 
 Both are correct; they measure different things. The ROI document provides full scenario analysis.
 
@@ -320,7 +320,7 @@ Example: 50-user agency
 
 | Phase | Timeline | Activity | Revenue | Success Metric |
 |---|---|---|---|---|
-| Phase 0: Internal Scaling | Jun–Nov 2026 | Full deployment to dena IME (50 users) | €0 (cost centre) | 80%+ adoption; €24,905 Year 1 net benefit |
+| Phase 0: Internal Scaling | Jun–Nov 2026 | Full deployment to dena IME (50 users) | €0 (cost centre) | 80%+ adoption; €845 Year 1 net benefit (realistic: 1.5 hrs/week saved) |
 | Phase 1: Internal Expansion | Dec 2026–Q1 2027 | Expand to other dena divisions | €0 (internal allocation possible) | 50%+ other divisions adopt |
 | Phase 2a: Licensing Pilot | Q1–Q2 2027 | License to 1–2 federal agencies | €8–10K | First customer signed; deployment success |
 | Phase 2b: Federated Model Assessment | Q2–Q3 2027 | Assess Scenario C with Federal Ministry | €0 (R&D) | Ministry interest confirmed or ruled out |
@@ -337,7 +337,7 @@ Example: 50-user agency
 
 | Message | Evidence | Frequency |
 |---|---|---|
-| "We save €25K+/year on analyst time" | ROI doc — conservative scenario (€24,905 Year 1 net) | Quarterly business review |
+| "We save €6K+/year on analyst time" | ROI doc — conservative scenario (€845 Year 1 net, realistic: 1.5 hrs/week at €45/hr) | Quarterly business review |
 | "We reduce project failure risk with early warnings" | Risk assessment — early warning value quantified | Bi-weekly during pilot |
 | "We maintain GDPR and AI Act compliance" | Compliance documentation | Monthly + audit cycles |
 | "We position dena as AI/innovation leader in energy transition" | Case study + potential federal partnerships | Annual strategy meeting |
@@ -561,7 +561,7 @@ Revenue projection:
 ```
 2026: INTERNAL TOOL
 - Deploy to dena IME (50 users)
-- Build case study; validate €24,905 Year 1 net benefit
+- Build case study; validate €845 Year 1 net benefit (1.5 hrs/week saved at €45/hr)
 - Prove operational reliability
 
 2027 Q1-Q2: LICENSING PILOT
@@ -604,16 +604,16 @@ Revenue projection:
 
 | Phase | Duration | Status | Investment | Key Outcome |
 |---|---|---|---|---|
-| Phase 1: POC | Apr–May 2026 | ✅ Complete | €4,290 | Technical and cost feasibility proven |
+| Phase 1: POC | Apr–May 2026 | ✅ Complete | €2,970 | Technical and cost feasibility proven |
 | Phase 2: Pilot | Jul–Aug 2026 | ⏳ Planned | €8,000 | Go/No-Go decision for Phase 3 |
 | Phase 3: Full Deploy | Sep–Nov 2026 | ⏳ Planned | €12,000 | System fully operational; 80%+ adoption |
 | Year 2: Strategic Review | Dec 2026–Jan 2027 | ⏳ Planned | €0 (decision point) | Internal only vs. external expansion decision |
 
-**Total Year 1 Investment:** €24,290
-**Expected Year 1 Direct Benefit:** €32,890 (time savings — conservative scenario)
-**Year 1 Net Benefit (after all programme costs):** ~€8,600
-**Operational break-even (upfront build cost only):** 7 weeks (per ROI doc)
-**Full programme break-even (all Phase 1–3 costs):** ~9–10 months
+**Total Year 1 Investment:** €22,970
+**Expected Year 1 Direct Benefit:** €6,390 (time savings — realistic scenario: 1.5 hrs/week at €45/hr)
+**Year 1 Net Benefit (after all programme costs):** ~−€17,900 ⚠️ *Business case requires early-warning benefits or portfolio scaling*
+**Operational break-even (upfront build cost only):** ~5.6 months (per ROI doc)
+**Full programme break-even (all Phase 1–3 costs):** ~3.8 years (direct savings only; faster if ancillary benefits materialize)
 
 ---
 
@@ -678,7 +678,7 @@ Phase 3 by 1 week per item.
 
 The dena IME Weekly Portfolio Reporting System has a clear, phased path to operational and strategic success.
 
-**2026 Goal:** Full internal operationalisation — 50+ users, 99%+ uptime, 80%+ adoption, €24,905 Year 1 net benefit proven.
+**2026 Goal:** Full internal operationalisation — 50+ users, 99%+ uptime, 80%+ adoption, €845 Year 1 net benefit validated (or early-warning benefits measured if achievable).
 
 **2027 Goal:** Validate external demand — license to 1–2 federal agencies; initiate Federal Ministry dialogue on federated platform model.
 
@@ -691,9 +691,9 @@ The dena IME Weekly Portfolio Reporting System has a clear, phased path to opera
 4. External demand validation in 2026–2027
 5. Regulatory environment remains stable (GDPR, EU AI Act, IT-Sicherheitsgesetz)
 
-**Investment required:** €24,290 (Phases 1–3); €50K+ additional for Year 2 external expansion (licensing + platform assessment)
+**Investment required:** €22,970 (Phases 1–3); €50K+ additional for Year 2 external expansion (licensing + platform assessment)
 
-**Expected returns:** €32,890/year internal (time savings, conservative); €25–75K/year external from Year 3 (licensing + platform service fees)
+**Expected returns:** €6,390/year internal (time savings, realistic: 1.5 hrs/week at €45/hr); €25–75K/year external from Year 3 (licensing + platform service fees) — external revenue is critical to justify €22,970 programme investment
 
 ---
 

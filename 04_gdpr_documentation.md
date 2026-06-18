@@ -174,7 +174,7 @@ Processing is lawful under GDPR subject to the following conditions:
 ### 3.2 Necessity & Proportionality
 
 **Is processing necessary?**
-Yes. Portfolio analysis could theoretically be performed manually (7.5 hrs/week), but automated analysis is the chosen means for the public task. The US border crossing is a deliberate efficiency trade-off: Anthropic's Claude Sonnet is selected for accuracy. An on-premises LLM (e.g., Llama) would avoid the transfer but at significantly lower output quality.
+Yes. Portfolio analysis could theoretically be performed manually (1.5 hrs/week for minimal review), but automated analysis is the chosen means for the public task. The US border crossing is a deliberate efficiency trade-off: Anthropic's Claude Sonnet is selected for accuracy and timeliness. An on-premises LLM (e.g., Llama) would avoid the transfer but at significantly lower output quality and increased maintenance burden.
 
 **Is processing proportionate?**
 

@@ -278,7 +278,7 @@ Excel File → Reader (openpyxl) → Claude API (JSON) → Report Generator → 
 | Leadership Decision Turnaround | 2–3 days (awaiting clarification) | <24 hours | Week 2 | Decision log timestamps post-report |
 | Report Consistency Score | [ASSUMPTION] 60% (analyst variation) | 95%+ (standardised AI analysis) | Week 1 | Stakeholder feedback: consistency rating (1–10) |
 
-> **Note on financial impact:** Full ROI calculation, cost-benefit analysis, and financial assumptions are documented in `02_roi_risk_assessment.md`. The conservative annual benefit estimate is **€32,890/year** (direct savings), with a break-even of **7 weeks** under base-case assumptions.
+> **Note on financial impact:** Full ROI calculation, cost-benefit analysis, and financial assumptions are documented in `02_roi_risk_assessment.md`. The conservative annual benefit estimate is **€6,390/year** (direct savings), with a break-even of **Q4 Year 1** under realistic base-case assumptions (1.5 hrs/week saved at €45/hr).
 
 ---
 

@@ -1,13 +1,13 @@
 # ROI & Risk Assessment
 ## dena IME — AI Portfolio Reporting System
 
-**Version:** 1.1 · **Date:** June 2026 · **Currency:** EUR (1 USD = 0.92 EUR) · **Horizon:** 12 & 36 months
+**Version:** 1.2 · **Date:** June 2026 · **Currency:** EUR (1 USD = 0.92 EUR) · **Horizon:** 12 & 36 months
 
 ---
 
 ## Executive Summary
 
-The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk investment**. Under the base-case scenario, the system pays for itself in **7 weeks** and generates a Year 1 net benefit of **€24,905** after upfront costs (580% ROI). Even in a downside scenario — where user adoption is low and only 2 hours per week are saved — the system breaks even in Year 2. Total risk score across 8 assessed risks is **75/200 (Low)**. Recommendation: **proceed with full deployment.**
+The dena IME AI Portfolio Reporting System delivers a **modest, low-risk investment**. Under the base-case scenario with realistic time savings (1.5 hrs/week at €45/hr), the system breaks even in **Q4 Year 1** and generates a Year 1 net benefit of **€845** after upfront costs (29% ROI). Cumulative 3-year net benefit: **€8,275**. The system becomes attractive only if early warning benefits or portfolio scaling materialize. Total risk score across 8 assessed risks is **75/200 (Low)**. Recommendation: **proceed with pilot deployment; validate time-savings assumptions before full rollout.**
 
 ---
 
@@ -17,12 +17,12 @@ The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk in
 
 | Cost Category | Hours | Estimate | Basis | Notes |
 |---|---|---|---|---|
-| Development Time | 40 hrs | €2,600 | [ASSUMPTION] 40 hrs @ €65/hr fully loaded | System design, coding, testing, deployment |
-| Setup & Configuration | 8 hrs | €520 | [ASSUMPTION] 8 hrs @ €65/hr | Claude API, Railway, Resend, env config |
-| Training & Documentation | 4 hrs | €260 | [ASSUMPTION] 4 hrs @ €65/hr | Stakeholder training, README, documentation |
-| Testing & QA | 8 hrs | €520 | [ASSUMPTION] 8 hrs @ €65/hr | Local testing, mock data, error scenarios |
-| Contingency (10%) | — | €390 | [ASSUMPTION] 10% buffer | Overruns, rework, troubleshooting |
-| **TOTAL UPFRONT COSTS** | **60 hrs** | **€4,290** | One-time investment | |
+| Development Time | 40 hrs | €1,800 | [ASSUMPTION] 40 hrs @ €45/hr fully loaded | System design, coding, testing, deployment |
+| Setup & Configuration | 8 hrs | €360 | [ASSUMPTION] 8 hrs @ €45/hr | Claude API, Railway, Resend, env config |
+| Training & Documentation | 4 hrs | €180 | [ASSUMPTION] 4 hrs @ €45/hr | Stakeholder training, README, documentation |
+| Testing & QA | 8 hrs | €360 | [ASSUMPTION] 8 hrs @ €45/hr | Local testing, mock data, error scenarios |
+| Contingency (10%) | — | €270 | [ASSUMPTION] 10% buffer | Overruns, rework, troubleshooting |
+| **TOTAL UPFRONT COSTS** | **60 hrs** | **€2,970** | One-time investment | |
 
 ---
 
@@ -35,9 +35,9 @@ The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk in
 | Claude API (Sonnet) | Weekly | 52 reports | ≈€0.003/report | €0.14 | [ASSUMPTION] ~2,000 tokens/report, Sonnet pricing |
 | Railway Hosting | Monthly | 12 months | €4.60/month | €55.20 | [ASSUMPTION] Starter plan; includes process uptime + logging |
 | Resend Email API | Per email | 52 emails | Free (≤100/mo) | €0.00 | Free tier covers 52 weekly reports; no overage expected |
-| Human Review (QA) * | Weekly | 52 weeks | €65/hr | €3,380 | [DESIGN DECISION] 1 hr/week PM review — mandatory human-in-the-loop |
-| Maintenance & Support | Ad-hoc | 4 hrs/year | €65/hr | €260 | [ASSUMPTION] Log review, prompt refinement, minor fixes |
-| **TOTAL ANNUAL ONGOING COSTS** | | | | **€3,695** | |
+| Human Review (QA) * | Weekly | 52 weeks | €45/hr | €2,340 | [DESIGN DECISION] 1 hr/week PM review — mandatory human-in-the-loop |
+| Maintenance & Support | Ad-hoc | 4 hrs/year | €45/hr | €180 | [ASSUMPTION] Log review, prompt refinement, minor fixes |
+| **TOTAL ANNUAL ONGOING COSTS** | | | | **€2,575** | |
 
 ---
 
@@ -45,10 +45,10 @@ The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk in
 
 | Benefit | Baseline State | After System | Annual Saving | Assumption Basis |
 |---|---|---|---|---|
-| Portfolio Manager Time | 7–10 hrs/week manual compilation | 1 hr/week review only | **€25,350/yr** | 7.5 hrs × 52 × €65/hr [ASSUMPTION] |
-| Leadership Review Time | 2–3 hrs (awaiting clarifications) | <30 min (self-contained report) | **€6,760/yr** | 2 hrs × 52 × €65/hr [ASSUMPTION] |
-| Finance Validation Cycles | 4–6 hrs/month manual cross-checking | 1 hr/month (automated validation) | **€780/yr** | 12 hrs × €65/hr [ASSUMPTION] |
-| **TOTAL DIRECT ANNUAL SAVINGS** | | | **€32,890/yr** | Conservative (1 FTE scope) |
+| Portfolio Manager Time | 7–10 hrs/week manual compilation | Minimal direct time savings | **€3,510/yr** | 1.5 hrs × 52 × €45/hr [ASSUMPTION] Realistic weekly time savings |
+| Leadership Review Time | 2–3 hrs (awaiting clarifications) | Structured report (faster to review) | **€2,340/yr** | 1 hr × 52 × €45/hr [ASSUMPTION] Modest time gain |
+| Finance Validation Cycles | 4–6 hrs/month manual cross-checking | 1 hr/month (automated validation) | **€540/yr** | 12 hrs × €45/hr [ASSUMPTION] |
+| **TOTAL DIRECT ANNUAL SAVINGS** | | | **€6,390/yr** | Conservative estimate (minimal workload reduction) |
 
 ---
 
@@ -67,17 +67,17 @@ The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk in
 
 | Metric | ⚠ Downside | Conservative | Moderate | Optimistic |
 |---|---|---|---|---|
-| **Assumption** | 2 hrs/week saved; low adoption | 7.5 hrs/week saved; base case | 7.5 hrs + early warning value | Full savings + portfolio scaling |
-| Annual Benefit | €6,760 | €32,890 | €37,890 | €147,890 |
-| Annual Ongoing Cost | €3,695 | €3,695 | €3,695 | €4,195 |
-| Upfront Cost | €4,290 | €4,290 | €4,290 | €4,290 |
-| **Year 1 Net (incl. upfront)** | **−€1,225** | **€24,905** | **€29,905** | **€139,405** |
-| **Year 1 ROI (on upfront)** | **−29%** | **580%** | **697%** | **3,250%** |
-| Year 3 ROI (cumulative) | 297% | 1,741% | 2,091% | 10,261% |
-| Break-Even Point | Year 2, Q1 | **7 weeks** | **6 weeks** | **11 days** |
-| Cumulative 3-Year Net | €11,495 | **€82,975** | **€97,975** | **€432,345** |
+| **Assumption** | 0.5 hrs/week saved; low adoption | 1.5 hrs/week saved; realistic case | 1.5 hrs + early warning value | 1.5 hrs + scaling benefits |
+| Annual Benefit | €2,880 | €6,390 | €16,390 | €66,390 |
+| Annual Ongoing Cost | €2,575 | €2,575 | €2,575 | €3,075 |
+| Upfront Cost | €2,970 | €2,970 | €2,970 | €2,970 |
+| **Year 1 Net (incl. upfront)** | **−€2,665** | **€845** | **€10,845** | **€60,345** |
+| **Year 1 ROI (on upfront)** | **−90%** | **29%** | **365%** | **2,031%** |
+| Year 3 ROI (cumulative) | −44% | 168% | 678% | 7,631% |
+| Break-Even Point | Year 2, Q3 | **Year 1, Q4** | **Q1 2027** | **January 2026** |
+| Cumulative 3-Year Net | −€615 | **€8,275** | **€33,275** | **€183,275** |
 
-> **Downside scenario interpretation:** If adoption is low (2 hrs/week saved vs. 7.5 hrs baseline), Year 1 returns a small net loss of −€1,225. The system still recoups its investment in Year 2 (cumulative net: +€11,495 by Year 3). This confirms the **investment is robust even under pessimistic conditions**, with no scenario producing a long-term loss.
+> **Downside scenario interpretation:** If adoption is extremely low (0.5 hrs/week saved vs. 1.5 hrs realistic baseline), Year 1 returns a significant loss of −€2,665. The system struggles to recoup investment; by Year 3, cumulative net is only −€615. This stresses that the business case is **NOT robust under very pessimistic conditions** — success depends on achieving at least 1.5 hrs/week time savings, which should be validated in the pilot phase via time-tracking.
 
 ---
 
@@ -85,13 +85,13 @@ The dena IME AI Portfolio Reporting System delivers a **high-return, low-risk in
 
 | Assumption | Base Value | Sensitivity Range | Year 1 ROI Impact |
 |---|---|---|---|
-| PM Loaded Hourly Rate | €65/hr | ±€10/hr | ±€7,800/yr (±187%) |
-| Weekly Time Savings (PM) | 7.5 hrs/week | 2–10 hrs/week | ROI: −29% to +1,341% |
+| PM Loaded Hourly Rate | €45/hr | ±€5/hr | ±€2,340/yr (±280%) |
+| Weekly Time Savings (PM) | 1.5 hrs/week | 0.5–3 hrs/week | ROI: −90% to +195% |
 | Claude API Cost | €0.003/report | 10× increase | −€1.26/yr (negligible) |
-| Human Review Hours/Week | 1 hr/week | 0.5–2 hrs/week | ±€1,690/yr (±40%) |
-| Adoption Rate (savings realized) | 100% | 50–100% | ROI: 251–580% Year 1 |
+| Human Review Hours/Week | 1 hr/week | 0.5–2 hrs/week | ±€1,170/yr (±140%) |
+| Adoption Rate (savings realized) | 100% | 50–100% | ROI: −29% to +29% Year 1 |
 
-**Conclusion:** ROI is driven primarily by the PM time-savings assumption (7.5 hrs/week). This is the single variable that most affects outcomes and **must be validated in the pilot phase via time-tracking.** API and hosting costs are negligible at current scale and have virtually no sensitivity impact.
+**Conclusion:** ROI is extremely sensitive to the weekly time-savings assumption (1.5 hrs/week). The base case yields only 29% Year 1 ROI; downside scenario produces −90% loss. **Time-savings must be validated in pilot phase via rigorous time-tracking.** At this rate, the system is cost-neutral to slightly profitable; business case hinges entirely on early-warning or scaling benefits materializing.
 
 ---
 
@@ -192,7 +192,7 @@ Risk Score = Likelihood (1–5) × Impact (1–5). Thresholds: 1–5 Minimal (ac
 | **Category** | Operational |
 | **Description** | PMs resist structured AI output. Leadership finds new format less satisfying. Stakeholders receive emails they don't trust or read. System technically works but ROI never materializes. |
 | **Trigger** | First reports delivered; <50% email open rate; PMs bypass system and continue manual analysis. |
-| **Likelihood** | 2/5 — Strong adoption driver: system eliminates 7.5 hrs/week of PM workload. Risk increases if perceived as imposed top-down. |
+| **Likelihood** | 3/5 — Adoption driver is weak: system eliminates only 1.5 hrs/week of PM workload (modest time savings). Risk increases if perceived as imposed top-down. Higher likelihood of resistance due to minimal tangible benefit. |
 | **Impact** | 3/5 — ROI assumptions fail. Resources spent on maintenance without benefit. Opportunity cost. |
 | **Risk Score** | **2 × 3 = 6 (Minimal — Monitor)** |
 | **Mitigation** | Co-design report template with Division Head + PMs before launch. Frame as "your workload reduction tool." Track email open rates and satisfaction surveys (target: >75% satisfaction by Month 2). In Month 1, highlight one concrete insight the system enabled. |
@@ -223,11 +223,11 @@ Risk Score = Likelihood (1–5) × Impact (1–5). Thresholds: 1–5 Minimal (ac
 | 2.2 | Technical | External API Downtime | 2/5 | 3/5 | **6** | Monitor |
 | 3.1 | Ethical | AI Bias in Project Risk Assessment | 2/5 | 4/5 | **8** | Monitor |
 | 3.2 | Ethical | Over-Reliance on AI / Loss of Human Judgment | 3/5 | 3/5 | **9** | Monitor |
-| 4.1 | Operational | Poor User Adoption / Change Resistance | 2/5 | 3/5 | **6** | Monitor |
+| 4.1 | Operational | Poor User Adoption / Change Resistance | 3/5 | 3/5 | **9** | Monitor |
 | 4.2 | Operational | Vendor Lock-In & Sustainability Risk | 2/5 | 2/5 | **4** | Accept |
-| | | | | **Total** | **75/200** | **Low** |
+| | | | | **Total** | **78/200** | **Low** |
 
-**Total Risk Score: 75/200 (37.5% utilization) — LOW OVERALL RISK PROFILE.** No critical or high-severity risks identified. Largest risks (IT Security compliance, Claude hallucination, over-reliance on AI) are fully manageable via the stated mitigation strategies. **Proceed with deployment.**
+**Total Risk Score: 78/200 (39% utilization) — LOW OVERALL RISK PROFILE.** No critical or high-severity risks identified. Largest risks (Poor adoption due to weak time-saving signal, IT Security compliance, Claude hallucination) are fully manageable via the stated mitigation strategies. **Proceed with pilot deployment; reassess if adoption targets are not met.**
 
 ---
 
@@ -246,11 +246,11 @@ Risk Score = Likelihood (1–5) × Impact (1–5). Thresholds: 1–5 Minimal (ac
 
 | Dimension | Assessment |
 |---|---|
-| **Financial Returns** | Break-even in 7 weeks (conservative). Year 1 ROI: 580%. Cumulative 3-year net benefit: €82,975–€432,345 depending on scenario. Downside scenario still yields positive return by Year 2. |
-| **Operational Returns** | 75% reduction in portfolio analyst time (7.5 hrs/week saved). Earlier risk detection. Structured, data-driven decision framework for IME leadership. |
+| **Financial Returns** | Break-even in Q4 Year 1 (realistic estimate). Year 1 ROI: 29% (conservative case). Cumulative 3-year net benefit: €8,275–€183,275 depending on scenario. Downside scenario produces −90% Year 1 loss; recovery only if early-warning benefits materialize. |
+| **Operational Returns** | Modest reduction in portfolio analyst time (1.5 hrs/week saved, not 7.5). Automated data validation. Structured, data-driven decision framework for IME leadership. Early-warning potential if system matures. |
 | **Risk Profile** | Total risk score: 75/200 (Low). No critical risks. Largest risks manageable via DPA audit, human review loop, and prompt governance. |
-| **Strategic Optionality** | System enables portfolio scaling (26 → 50+ projects) without proportional staffing increase. Foundation for future AI expansion within dena. |
-| **Recommendation** | **APPROVE for full production deployment.** Allocate €5K Year 1 budget for operations + mitigation. Assign Risk Steward. Validate time-savings assumption in Month 1 via time-tracking. |
+| **Strategic Optionality** | System enables portfolio scaling (26 → 50+ projects) without proportional staffing increase IF early-warning and process-improvement benefits materialize. Foundation for future AI expansion within dena. |
+| **Recommendation** | **APPROVE for pilot deployment (not full rollout).** Allocate €3K Year 1 budget for operations + mitigation. Assign Risk Steward. CRITICAL: Validate time-savings assumption in Month 1 via rigorous time-tracking. If <1 hr/week saves is achieved, escalate business case to steering committee before full deployment. |
 
 ---
 
