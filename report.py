@@ -76,6 +76,38 @@ Analysis rules:
 ABSOLUTELY CRITICAL: Return ONLY the JSON object. Begin with { and end with }. Nothing else."""
 
 
+def _calculate_portfolio_summary(projects: list[dict]) -> dict:
+    """Pre-calculate exact portfolio summary statistics."""
+    from collections import Counter
+
+    # Status distribution
+    statuses = Counter(str(p.get('overall_status', 'Unknown')).lower() for p in projects)
+
+    # Budget totals
+    total_budget = sum(p.get('budget', 0) or 0 for p in projects if isinstance(p.get('budget'), (int, float)))
+    total_spend = sum(p.get('spend_ytd', 0) or 0 for p in projects if isinstance(p.get('spend_ytd'), (int, float)))
+
+    # Projects with high utilization (>90%)
+    high_util_count = 0
+    for p in projects:
+        budget = p.get('budget')
+        spend = p.get('spend_ytd')
+        if isinstance(budget, (int, float)) and isinstance(spend, (int, float)) and budget > 0:
+            pct = (spend / budget) * 100
+            if pct >= 90:
+                high_util_count += 1
+
+    return {
+        'red': statuses.get('red', 0),
+        'amber': statuses.get('amber', 0),
+        'green': statuses.get('green', 0),
+        'total_projects': len(projects),
+        'total_budget_eur': int(total_budget),
+        'total_spend_ytd_eur': int(total_spend),
+        'high_util_count': high_util_count
+    }
+
+
 def format_portfolio_data(projects: list[dict]) -> str:
     """
     Format project list into structured text for Claude analysis.
@@ -112,6 +144,7 @@ def generate_report(projects: list[dict], api_key: str) -> dict:
     """
     client = Anthropic(api_key=api_key)
     portfolio_text = format_portfolio_data(projects)
+    summary_stats = _calculate_portfolio_summary(projects)
 
     try:
         message = client.messages.create(
@@ -121,7 +154,19 @@ def generate_report(projects: list[dict], api_key: str) -> dict:
             messages=[
                 {
                     "role": "user",
-                    "content": f"Analyze this portfolio and respond ONLY with the JSON object:\n\n{portfolio_text}"
+                    "content": f"""Analyze this portfolio and respond ONLY with the JSON object.
+
+EXACT PORTFOLIO STATISTICS (use these exact values):
+- Red projects: {summary_stats['red']}
+- Amber projects: {summary_stats['amber']}
+- Green projects: {summary_stats['green']}
+- Total projects: {summary_stats['total_projects']}
+- Total budget: €{summary_stats['total_budget_eur']:,}
+- Total spend YTD: €{summary_stats['total_spend_ytd_eur']:,}
+- Projects >90% budget utilization: {summary_stats['high_util_count']}
+
+PORTFOLIO DATA:
+{portfolio_text}"""
                 }
             ]
         )

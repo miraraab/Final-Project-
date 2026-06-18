@@ -47,6 +47,12 @@ def read_excel_data(file_path: str) -> list[dict]:
             if row[0] is None:
                 break
 
+            # Skip totals/summary rows
+            project_id = str(row[0]).upper() if row[0] else ""
+            if "TOTAL" in project_id or "SUMMARY" in project_id:
+                logger.debug(f"Skipping totals/summary row: {row[0]}")
+                continue
+
             # Create dict from row data
             project_dict = {}
             for col_idx, header in enumerate(column_headers):

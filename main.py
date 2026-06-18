@@ -15,6 +15,8 @@ if resend_api_key:
 from reader import read_excel_data
 from report import generate_report
 from email_sender import send_email, send_fallback_email
+from chart_agent import generate_portfolio_charts
+from data_validator import validate_portfolio_data
 
 # Configure logging
 logging.basicConfig(
@@ -63,6 +65,13 @@ def run_report():
 
     logger.info(f"Read {len(projects)} projects from portfolio")
 
+    # Step 1b: Run data quality check
+    logger.info("Running AI data quality check")
+    validation = validate_portfolio_data(projects, anthropic_api_key)
+    logger.info(f"Data validation: {validation.get('summary', 'no summary')}")
+    if not validation.get('passed'):
+        logger.warning("Data quality check failed — proceeding with warnings")
+
     # Step 2: Generate report via Claude
     logger.info("Calling Claude API for report generation")
     report = generate_report(projects, anthropic_api_key)
@@ -73,9 +82,13 @@ def run_report():
         send_fallback_email(error_msg, sender_email, recipient_email, resend_api_key)
         return
 
+    # Step 2b: Generate charts
+    logger.info("Generating portfolio charts")
+    charts = generate_portfolio_charts(projects)
+
     # Step 3: Send email
     logger.info("Sending report email")
-    email_sent = send_email(report, projects, sender_email, recipient_email, resend_api_key)
+    email_sent = send_email(report, projects, sender_email, recipient_email, resend_api_key, charts=charts, validation=validation)
 
     if not email_sent:
         logger.warning("Email send failed, but report was generated successfully")

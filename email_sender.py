@@ -1,7 +1,10 @@
 import logging
 import os
+import base64
 from datetime import datetime
 from resend import Emails
+from chart_agent import generate_portfolio_charts
+from data_validator import build_validation_banner_html
 
 logger = logging.getLogger(__name__)
 
@@ -202,7 +205,7 @@ def build_recommendations_html(actions: list) -> str:
     """
 
 
-def build_html_email(report_json: dict, projects: list[dict], report_date: str) -> str:
+def build_html_email(report_json: dict, projects: list[dict], report_date: str, charts: dict = None, validation: dict = None) -> str:
     """
     Build HTML email template from structured JSON report.
 
@@ -235,7 +238,29 @@ def build_html_email(report_json: dict, projects: list[dict], report_date: str) 
     )
     recommendations_html = build_recommendations_html(report_json.get('leadership_actions', []))
 
-    sections_html = summary_html + actions_html + amber_html + green_html + budget_html + recommendations_html
+    # Build validation HTML
+    validation_html = build_validation_banner_html(validation) if validation else ""
+
+    # Build charts HTML with cid references (for email attachments)
+    charts_html = ""
+    if charts and charts.get("risk_chart_b64"):
+        charts_html = f"""
+    <div style="margin-bottom: 24px;">
+      <h2 style="color: #003087; font-size: 16px; font-weight: 600; margin-bottom: 16px;">📈 Portfolio Dashboard</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="40%" style="padding-right: 12px; vertical-align: top;">
+            <img src="cid:risk_chart" width="100%" style="max-width: 280px; display: block;" alt="Risk Status"/>
+          </td>
+          <td width="60%" style="vertical-align: top;">
+            <img src="cid:budget_chart" width="100%" style="display: block;" alt="Budget Utilization"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+    """
+
+    sections_html = summary_html + validation_html + charts_html + actions_html + amber_html + green_html + budget_html + recommendations_html
 
     html = f"""
     <!DOCTYPE html>
@@ -320,7 +345,9 @@ def send_email(
     projects: list[dict],
     sender_email: str,
     recipient_email: str,
-    api_key: str
+    api_key: str,
+    charts: dict = None,
+    validation: dict = None
 ) -> bool:
     """
     Send formatted HTML email via Resend.
@@ -344,14 +371,50 @@ def send_email(
         monday = today - __import__('datetime').timedelta(days=today.weekday())
         report_date = monday.strftime("%Y-%m-%d")
 
-        html_body = build_html_email(report_text, projects, report_date)
+        # Ensure validation is a dict, not a string
+        if isinstance(validation, str):
+            logger.warning(f"Validation was a string: {validation[:100]}, converting to empty dict")
+            validation = {}
 
-        response = client.send({
+        logger.debug(f"Validation type: {type(validation)}, keys: {list(validation.keys()) if isinstance(validation, dict) else 'N/A'}")
+
+        try:
+            html_body = build_html_email(report_text, projects, report_date, charts=charts, validation=validation)
+        except Exception as e:
+            logger.error(f"Error building HTML email: {e}", exc_info=True)
+            raise
+
+        # Build email payload with optional attachments
+        email_payload = {
             "from": sender_email,
             "to": recipient_email,
             "subject": f"IME Division Weekly Portfolio Report — {report_date}",
             "html": html_body
-        })
+        }
+
+        # Add chart attachments if available
+        if charts and charts.get("risk_chart_b64"):
+            try:
+                risk_bytes = base64.b64decode(charts["risk_chart_b64"])
+                budget_bytes = base64.b64decode(charts["budget_chart_b64"])
+
+                email_payload["attachments"] = [
+                    {
+                        "filename": "risk_chart.png",
+                        "content": list(risk_bytes),
+                        "content_id": "risk_chart"
+                    },
+                    {
+                        "filename": "budget_chart.png",
+                        "content": list(budget_bytes),
+                        "content_id": "budget_chart"
+                    }
+                ]
+                logger.info("Chart attachments added to email")
+            except Exception as e:
+                logger.warning(f"Error adding chart attachments: {e}")
+
+        response = client.send(email_payload)
 
         logger.info(f"Email sent successfully. Message ID: {response.id}")
         return True
