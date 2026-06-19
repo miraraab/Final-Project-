@@ -46,7 +46,7 @@ The dena IME AI Portfolio Reporting System delivers a **modest, low-risk investm
 | Benefit | Baseline State | After System | Annual Saving | Assumption Basis |
 |---|---|---|---|---|
 | Portfolio Manager Time | 7–10 hrs/week manual compilation | Minimal direct time savings | **€3,510/yr** | 1.5 hrs × 52 × €45/hr [ASSUMPTION] Realistic weekly time savings |
-| Leadership Review Time | 2–3 hrs (awaiting clarifications) | Structured report (faster to review) | **€2,340/yr** | 1 hr × 52 × €45/hr [ASSUMPTION] Modest time gain |
+| Leadership Review Time | 1 hr (awaiting clarifications) | Structured report (faster to review) | **€2,340/yr** | 1 hr × 52 × €45/hr [ASSUMPTION] Modest time gain |
 | Finance Validation Cycles | 4–6 hrs/month manual cross-checking | 1 hr/month (automated validation) | **€540/yr** | 12 hrs × €45/hr [ASSUMPTION] |
 | **TOTAL DIRECT ANNUAL SAVINGS** | | | **€6,390/yr** | Conservative estimate (minimal workload reduction) |
 
